@@ -10,7 +10,7 @@ function Level(rows, collumns) {
   }
 }
 this.loadImg;
-this.debug = false;
+this.debug = true;
 
 Level.prototype. drawBackground = function(ctx, img){}
 

@@ -1,17 +1,20 @@
-function Sprite(){
-  this.x = 0;
-  this.y = 0;
+function Sprite(x,y,width,height){
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
   this.vx = 0;
   this.vy = 0;
   this.ax = 0;
-  this.ay = 100;
-  this.g = 10;
+  this.ay = 0;
+  this.g = 0;
   this.gx;
   this.gy;
   this.isGround = false;
   this.isfalling = true;
   this.isJump = false;
   this.SIZE = 16;
+  this.layer = 1;
   this.pose = 0;
   this.frame = 0;
   this.poses = [
@@ -27,27 +30,12 @@ function Sprite(){
   this.images = null;
   this.imgKey = "pc";
   this.offset = -5;
+  this.debug = true;
 }
 
-Sprite.prototype.desenhar = function (ctx) {
-  this.desenharQuadrado(ctx);
-  this.desenharPose(ctx);
-}
 
-Sprite.prototype.desenharObjeto = function (ctx, img) {
-  ctx.save();
-  ctx.translate(this.x, this.y);
-  ctx.rotate(this.angle*2*Math.PI/360);
-  ctx.fillStyle = this.color;
-  ctx.drawImage(img , -this.width/2, -this.height/2, this.width, this.height);
-  if(this.debug){
-    ctx.strokeStyle = "grey";
-    ctx.strokeRect(-this.width/2, -this.height/2, this.width, this.height);
-  }
-  ctx.restore();
-};
 
-Sprite.prototype.desenharQuadrado = function (ctx) {
+Sprite.prototype.drawCicle = function (ctx) {
   ctx.save();
   ctx.translate(this.x, this.y);
   ctx.fillStyle = "black";
@@ -58,7 +46,29 @@ Sprite.prototype.desenharQuadrado = function (ctx) {
   ctx.restore();
 };
 
-Sprite.prototype.desenharPose = function (ctx) {
+Sprite.prototype.drawRect = function (ctx) {
+  ctx.save();
+  ctx.translate(this.x, this.y);
+  ctx.fillStyle = "gray";
+  ctx.fillRect(this.x, this.y, this.width,this.height);
+  if(debug){
+        ctx.strokeStyle = "Red";
+        ctx.strokeRect(this.x, this.y, this.width,this.height);
+        ctx.strokeRect(this.x + this.width/2, this.y + this.height/2,5,5);
+    }
+  ctx.restore();
+};
+
+Sprite.prototype.drawCam = function (ctx) {
+  ctx.save();
+  ctx.translate(this.x, this.y);
+  ctx.strokeStyle = "Red";
+  ctx.strokeRect(this.x, this.y, this.width,this.height);
+  ctx.fillRect(this.x, this.y,5,5);
+  ctx.restore();
+};
+
+Sprite.prototype.drawPose = function (ctx) {
   ctx.save();
   ctx.translate(this.x, this.y);
   this.images.drawFrame(ctx,
@@ -75,59 +85,14 @@ Sprite.prototype.localizacao = function(map){
   this.gy = Math.floor(this.y/map.SIZE);
 }
 
-Sprite.prototype.mover = function (map, dt) {
+Sprite.prototype.mover = function (dt) {
+	
+  //movimenta eixo x y
+  this.vx = this.vx + this.ax*dt;
+  this.x = this.x + this.vx*dt;
+  this.vy = this.vy + (this.ay + this.g)*dt;
+  this.y = this.y + this.vy*dt;
 
-  this.localizacao(map);
-
-  //movimenta eixo x
-  if(this.vx > 0 && map.cells[this.gy ][this.gx + 1] == 5){
-    this.x += Math.min((this.gx + 1) * map.SIZE - (this.x + this.SIZE/2),this.vx * dt);
-  }else if(this.vx < 0 && map.cells[this.gy ][this.gx - 1] == 5){
-    this.x += Math.max((this.gx) * map.SIZE - (this.x - this.SIZE/2),this.vx * dt);
-  }else{
-    this.x = this.x + this.vx * dt;
-  }
-
-//movimentaçao no eixo y 
-  if(this.isfalling){
-     if(map.cells[this.gy][this.gx] == 1){
-      this.isGround = true;
-      this.isfalling = false;
-      this.y += (this.gy)*map.SIZE - (this.y-this.SIZE/2);
-      }else if(map.cells[this.gy][this.gx] == 5){
-      this.isGround = true;
-      this.isfalling = false;
-      this.y += (this.gy)*map.SIZE - (this.y-this.SIZE/2);
-      }else{
-        this.vy = this.vy + (this.ay + this.g)*dt;
-        this.y = this.y + this.vy*dt;
-      }
-  }
-  if(this.isGround){
-      if(this.isJump){
-        this.isGround = false;
-      }else if(map.cells[this.gy][this.gx] != 1){
-        this.isGround = false;
-        this.isfalling = true;
-      }else{
-        this.y += (this.gy)*map.SIZE - (this.y-this.SIZE/2);
-      }
-  }
-  if(this.isJump){
-     if(this.vy <= 0){
-        this.vy = this.vy + (this.ay + this.g)*dt;
-        this.y = this.y + this.vy*dt;
-     }else{
-       this.isJump = false;
-       this.isfalling = true;
-     }
-  }
-
-  if(map.cells[this.gy - 1][this.gx] == 3){
-    map.cells[this.gy - 1][this.gx] = 2;
-    //map.deletaCoin(this.gy-1,this.gx);
-    map.coins--;
-  }
   this.atualizaFrameAnimacoa(dt);
 };
 
