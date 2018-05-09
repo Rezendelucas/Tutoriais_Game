@@ -47,25 +47,19 @@ Sprite.prototype.drawCicle = function (ctx) {
 };
 
 Sprite.prototype.drawRect = function (ctx) {
-  ctx.save();
-  ctx.translate(this.x, this.y);
   ctx.fillStyle = "gray";
   ctx.fillRect(this.x, this.y, this.width,this.height);
   if(debug){
         ctx.strokeStyle = "Red";
+        ctx.font="18px Verdana";
+        ctx.fillStyle = "red";
+        ctx.fillText("xy",this.x , this.y); 
+        ctx.strokeRect(this.x, this.y, 2,2);
+        ctx.fillText("box",this.x + this.width/2 , this.y); 
         ctx.strokeRect(this.x, this.y, this.width,this.height);
+        ctx.fillText("centro",this.x + this.width/2 -30, this.y + this.height/2); 
         ctx.strokeRect(this.x + this.width/2, this.y + this.height/2,5,5);
     }
-  ctx.restore();
-};
-
-Sprite.prototype.drawCam = function (ctx) {
-  ctx.save();
-  ctx.translate(this.x, this.y);
-  ctx.strokeStyle = "Red";
-  ctx.strokeRect(this.x, this.y, this.width,this.height);
-  ctx.fillRect(this.x, this.y,5,5);
-  ctx.restore();
 };
 
 Sprite.prototype.drawPose = function (ctx) {
@@ -86,7 +80,7 @@ Sprite.prototype.localizacao = function(map){
 }
 
 Sprite.prototype.mover = function (dt) {
-	
+
   //movimenta eixo x y
   this.vx = this.vx + this.ax*dt;
   this.x = this.x + this.vx*dt;

@@ -13,8 +13,9 @@ var gamePaused = false;
 //Recursos do game
 var imgLoad;
 var audLoad;
+var newCam;
 var newScreenMenu;
-var loadLeveis;
+var loadlvl;
 var newLevel;
 var newPlayer;
 
@@ -35,15 +36,17 @@ function init(){
   imgLoad.load("up_ground","Assets/Up_Rock.png");
   imgLoad.load("rock","Assets/Rock.png");
 
-  loadLeveis = new LoadLeveis();
-  loadLeveis.getLevel();
+  loadlvl = new LoadLeveis();
+  loadlvl.getLevel();
+
+  newCam = {x:0, y:0, width:canvas.width, height: canvas.height};
 
   //
   setScreen(MENU);
   newCam = {x:0, y:0, width:canvas.width, height: canvas.height};
-  newLevel = new Level(10,13);
-  newLevel.currente_level = loadLeveis.getLevel();
-  newPlayer = new Sprite(50,158,80,160);
+  newLevel = new Level(10,13,128);//linhas , colunas , tamnho da cell
+  newLevel.currente_level = loadlvl.getLevel();
+  newPlayer = new Sprite(128*5,320,80,160);
   requestAnimationFrame(loop);
 }
   ////////////////////////////////Game//////////////////////////////////
@@ -54,15 +57,9 @@ function loop(){
     if(screen == GAME){
       if(!gamePaused){
           preLoop();
-
-          ctx.save();
-          ctx.translate(Math.floor(canvas.width/2-newPlayer.x),Math.floor(canvas.height/2-newPlayer.y));
-          newPlayer.mover(dt);
-          newLevel.drawGrid(ctx,imgLoad);
-          newPlayer.drawRect(ctx);  
-
+          update();
+          render();
           posLoop();     
-          ctx.restore();
         }
       }else if(screen == MENU){
           newScreenMenu = new Screen();
@@ -74,18 +71,16 @@ function loop(){
 
 
     function update(){
-      newPlayer.mover(newLevel,dt);
-      //updateCam();
+      newPlayer.mover(dt);
+      updateCam();
     }
 
     function render(){
       ctx.save();
-      ctx.translate(Math.floor(canvas.width/2-newPlayer.x),Math.floor(canvas.height/2-newPlayer.y));
-    
+      ctx.translate(-newCam.x,-newCam.y);
       newLevel.drawGrid(ctx,imgLoad);
       newPlayer.drawRect(ctx);
-     
-     ctx.restore();
+      ctx.restore();
     }
     
 
@@ -97,7 +92,7 @@ function preLoop(){
     atual = new Date(); 
     dt = (atual-anterior)/1000;
     ctx.clearRect(0,0, canvas.width, canvas.height);
-    ctx.strokeStyle = "green";
+    ctx.strokeStyle = "red";
     ctx.strokeRect(0,0,canvas.width, canvas.height);
 }
 
@@ -106,8 +101,24 @@ function posLoop(){
 }
 
 function updateCam(){
-  newCam.x = newPlayer.x - 10;
-  //newCam.y = newPlayer.y; 
+  newCam.x = newPlayer.x - (newCam.width * 0.5); //left
+  limitCam();
+
+}
+
+function limitCam(){
+  if(newCam.x < 0){
+      newCam.x = 0;
+    }
+    if(newCam.x + newCam.width > (10 * 128)){
+      newCam.x = (10 * 128) - newCam.width;
+    }
+    if(newCam.y < 0){
+      newCam.y = 0;
+    }
+    if(newCam.y + newCam.height > (13 * 128)){
+      newCam.y = (13 * 128) - newCam.height;
+    }
 }
 
 function setScreen(screen){
@@ -118,7 +129,7 @@ addEventListener("keydown", function(e){
         switch (e.keyCode) {
           case 13://enter
             setScreen(GAME);
-            this.game();
+            this.loop();
             break;
           case 32:
             break;

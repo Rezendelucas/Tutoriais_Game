@@ -1,5 +1,5 @@
-function Level(rows, collumns) {
-  this.SIZE = 128;
+function Level(rows, collumns, size) {
+  this.SIZE = size;
   this.currente_level = [];
   this.cells = [];
   for (var r = 0; r < rows; r++) {
